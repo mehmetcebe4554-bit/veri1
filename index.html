@@ -18,7 +18,6 @@
         .dashboard-header {
             text-align: center;
             margin-bottom: 30px;
-            position: relative;
             width: 100%;
             max-width: 900px;
         }
@@ -32,27 +31,6 @@
             font-size: 0.9rem;
             color: #4ade80;
             margin-top: 5px;
-        }
-        
-        /* Sıfırlama Butonu Tasarımı */
-        .btn-sifirla {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
-        }
-        .btn-sifirla:hover {
-            background-color: #dc2626;
-        }
-        .btn-sifirla:active {
-            transform: scale(0.95);
         }
         
         /* 3'lü Veri Kutuları Tasarımı */
@@ -146,8 +124,6 @@
 <div class="dashboard-header">
     <h1>Canlı İzleme Paneli</h1>
     <div id="durum" class="status">Veriler yükleniyor...</div>
-    <!-- Sıfırlama Butonu Eklendi -->
-    <button class="btn-sifirla" onclick="kanaliSifirla()">Verileri Temizle / Sıfırla</button>
 </div>
 
 <!-- Anlık Veri Kutuları -->
@@ -184,10 +160,9 @@
     </table>
 </div>
 
-<script>
-    // --- GÜNCELLEMENİZ GEREKEN ALANLAR ---
-    const CHANNEL_ID = "U2W04WJ9MTZQPD4N"; // Kendi ThingSpeak Kanal ID'niz
-    const USER_API_KEY = "OFA2ZAQQJD0DRI9N"; // ThingSpeak Hesap Anahtarınız (Aşağıda nerede olduğu yazıyor)
+<script {id="thingspeak-script"}>
+    // --- GÜNCELLEMENİZ GEREKEN ALAN ---
+    const CHANNEL_ID = "KENDI_CHANNEL_ID_BURAYA"; // Kendi ThingSpeak Kanal ID'niz
     // -------------------------------------
 
     const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=10`;
@@ -241,36 +216,6 @@
                 document.getElementById("durum").innerText = "Veri okuma hatası!";
                 document.getElementById("durum").style.color = "#f87171";
             });
-    }
-
-    // ThingSpeak Kanalındaki Tüm Verileri Tamamen Silen Fonksiyon
-    function kanaliSifirla() {
-        // Yanlışlıkla basılmalara karşı onay penceresi açıyoruz
-        if (confirm("DIKKAT! ThingSpeak'teki tüm geçmiş verileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
-            
-            // ThingSpeak Veri Silme API URL'si
-            const deleteUrl = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${USER_API_KEY}`;
-            
-            document.getElementById("durum").innerText = "Kanal sıfırlanıyor, lütfen bekleyin...";
-            document.getElementById("durum").style.color = "#fbbf24";
-
-            // Sunucuya HTTP DELETE isteği gönderiyoruz
-            fetch(deleteUrl, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) {
-                        alert("Kanal başarıyla sıfırlandı!");
-                        verileriGuncelle(); // Ekranı hemen tazelemek için fonksiyonu çağırıyoruz
-                    } else {
-                        alert("Sıfırlama başarısız! 'USER_API_KEY' kodunu doğru girdiğinizden emin olun.");
-                        verileriGuncelle();
-                    }
-                })
-                .catch(error => {
-                    console.error("Silme hatası:", error);
-                    alert("Bir hata oluştu, sıfırlanamadı.");
-                    verileriGuncelle();
-                });
-        }
     }
 
     // İlk açılışta ve her 5 saniyede bir otomatik çalıştır
