@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canlı Araç Hız Göstergesi</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 2px solid #38bdf8;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .speed-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #38bdf8;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .unit {
+            font-size: 1.5rem;
+            color: #64748b;
+        }
+        .status {
+            font-size: 0.9rem;
+            color: #4ade80;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Anlık Araç Hızı</h1>
+    <div class="speed-display" id="hizDegeri">0</div>
+    <div class="unit">km/s</div>
+    <div class="status" id="durum">Bağlantı kuruluyor...</div>
+</div>
+
+<script>
+    const CHANNEL_ID = "3430270"; // <-- Buraya ThingSpeak Kanal ID'ni yaz!
+    const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/fields/1.json?results=1`;
+
+    function veriCek() {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if(data.feeds && data.feeds.length > 0) {
+                    const sonHiz = data.feeds[0].field1;
+                    
+                    // Eğer sisteme henüz veri düşmediyse null gelebilir, kontrol ediyoruz
+                    if(sonHiz !== null) {
+                        document.getElementById("hizDegeri").innerText = sonHiz;
+                        document.getElementById("durum").innerText = "Canlı Bağlantı: Aktif";
+                        document.getElementById("durum").style.color = "#4ade80";
+                    } else {
+                        document.getElementById("durum").innerText = "Henüz veri alınamadı.";
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Hata:", error);
+                document.getElementById("durum").innerText = "Veri çekme hatası!";
+                document.getElementById("durum").style.color = "#f87171";
+            });
+    }
+
+    // Site açıldığında ilk veriyi çek
+    veriCek();
+    
+    // Her 5 saniyede bir veriyi otomatik yenile
+    setInterval(veriCek, 5000);
+</script>
+
+</body>
+</html>
